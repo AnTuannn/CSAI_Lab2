@@ -9,8 +9,6 @@
 #define MAX_BUFFER_SIZE 256
 #define MAX_SIZE 100
 
-int top = -1;
-
 // Hàm để xác định độ ưu tiên của toán tử với giá trị càng lớn độ ưu tiên càng cao
 int precedence(char op) 
 {
