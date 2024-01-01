@@ -240,7 +240,7 @@ int main()
             exit(EXIT_FAILURE);
         }
 
-        printf("Connection accepted from %s:%d\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
+        printf("Connection accepted from client %d\n", *new_sock);
 
         pthread_t client_thread;
 
