@@ -11,6 +11,7 @@
 
 int stack[MAX_SIZE];
 int top = -1;
+pthread_mutex_t lock; // Khởi tạo mutex
 
 // Hàm để push value vào stack
 void push(int x) 
@@ -153,7 +154,7 @@ int calculateExpression(const char* expression)
 
 // Hàm dùng để xử lý tín hiệu của từng client
 void *handle_client(void *arg) 
-{
+{   
     int clientSocket = *((int *)arg); // Tạo socket cho client đầu vào
     free(arg);
 
@@ -187,7 +188,11 @@ void *handle_client(void *arg)
         }
         else
         {
+            pthread_mutex_lock(&lock); // Khóa mutex
+
             result = calculateExpression(buffer);
+
+            pthread_mutex_unlock(&lock); // Mở khóa mutex
             sprintf(buffer, "%d", result);
         }
         
@@ -200,7 +205,7 @@ int main()
     int serverSocket, clientSocket;
     struct sockaddr_in serverAddr, clientAddr;
     socklen_t addrLen = sizeof(clientAddr);
-
+    pthread_mutex_init(&lock, NULL); // Khởi tạo mutex
     // Tạo socket
     if ((serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1) 
     {
@@ -256,6 +261,8 @@ int main()
     }
     // Đóng kết nối
     close(serverSocket);
+
+    pthread_mutex_destroy(&lock); // Hủy mutex
 
     return 0;
 }
