@@ -162,6 +162,15 @@ void *handle_client(void *arg)
         char buffer[MAX_BUFFER_SIZE];
         ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0); // Đọc dữ liệu từ client
 
+
+         // Kiểm tra nếu client muốn thoát
+        if (strcmp(buffer, "exit") == 0) 
+        {
+            printf("Client %d disconnected\n", clientSocket);
+            close(clientSocket); // Đóng kết nối
+            pthread_exit(NULL);
+        }
+
         if (bytesRead <= 0) 
         {
             perror("Error receiving data or client disconnected");
@@ -170,14 +179,6 @@ void *handle_client(void *arg)
         }
 
         buffer[bytesRead] = '\0';
-
-        // Kiểm tra nếu client muốn thoát
-        if (strcmp(buffer, "exit") == 0) 
-        {
-            printf("Client disconnected\n");
-            close(clientSocket); // Đóng kết nối
-            pthread_exit(NULL);
-        }
 
         int check = checkExpression(buffer); // Kiểm tra biểu thức nhập vào có đúng cú pháp không
         int result = 0;
