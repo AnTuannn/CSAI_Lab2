@@ -3,6 +3,7 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #define PORT 8080
 #define MAX_BUFFER_SIZE 256

@@ -1,12 +1,8 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <test.c>
 
-#define PORT 8080
-#define MAX_BUFFER_SIZE 256
 #define MAX_SIZE 100
 
 int stack[MAX_SIZE];
@@ -103,63 +99,7 @@ int calculateExpression(const char* expression) {
 }
 
 int main() {
-    int serverSocket, clientSocket;
-    struct sockaddr_in serverAddr, clientAddr;
-    socklen_t addrLen = sizeof(clientAddr);
-
-    // Tạo socket
-    if ((serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-        perror("Error creating socket");
-        exit(EXIT_FAILURE);
-    }
-
-    // Thiết lập địa chỉ server
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_addr.s_addr = INADDR_ANY;
-    serverAddr.sin_port = htons(PORT);
-
-    // Liên kết địa chỉ với socket
-    if (bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
-        perror("Error binding");
-        exit(EXIT_FAILURE);
-    }
-
-    // Lắng nghe kết nối từ client
-    if (listen(serverSocket, 1) == -1) {
-        perror("Error listening");
-        exit(EXIT_FAILURE);
-    }
-
-    printf("Server listening on port %d...\n", PORT);
-
-    // Chấp nhận kết nối từ client
-    if ((clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &addrLen)) == -1) {
-        perror("Error accepting connection");
-        exit(EXIT_FAILURE);
-    }
-
-    printf("Connection accepted from %s:%d\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
-
-    // Nhận dữ liệu từ client
-    char buffer[MAX_BUFFER_SIZE];
-    ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
-
-    if (bytesRead == -1) {
-        perror("Error receiving data");
-        exit(EXIT_FAILURE);
-    }
-
-    buffer[bytesRead] = '\0';
-
-    // Thực hiện tính toán
-    int result = calculateExpression(buffer);
-   
-    snprintf(buffer, "%d", result);
-    send(clientSocket, buffer, strlen(buffer), 0);
-
-    // Đóng kết nối
-    close(clientSocket);
-    close(serverSocket);
-
+    char expression[] = "(2*3 +5 *7 - 2)*5 + 3*2 + (12+3-7)";
+    printf("Result: %d\n", calculateExpression(expression));
     return 0;
 }
