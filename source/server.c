@@ -3,6 +3,7 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #define PORT 8080
 #define MAX_BUFFER_SIZE 256
@@ -100,6 +101,35 @@ int calculateExpression(const char* expression) {
     return numbers[0];
 }
 
+
+// This function will handle connection for each client
+void *handle_client(void *arg) {
+    int clientSocket = *((int *)arg);
+    free(arg);
+
+    while(1) {
+        char buffer[MAX_BUFFER_SIZE];
+        ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
+
+        if (bytesRead <= 0) {
+            perror("Error receiving data or client disconnected");
+            close(clientSocket);
+            pthread_exit(NULL);
+        }
+
+        buffer[bytesRead] = '\0';
+        if (strcmp(buffer, "exit") == 0) {
+            printf("Client disconnected\n");
+            close(clientSocket);
+            pthread_exit(NULL);
+        }
+
+        int result = calculateExpression(buffer);
+        sprintf(buffer, "%d", result);
+        send(clientSocket, buffer, strlen(buffer), 0);
+    }
+}
+
 int main() {
     int serverSocket, clientSocket;
     struct sockaddr_in serverAddr, clientAddr;
@@ -129,39 +159,27 @@ int main() {
     }
 
     printf("Server listening on port %d...\n", PORT);
-    while(1)
-    {
-        // Chấp nhận kết nối từ client
-        if ((clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &addrLen)) == -1) {
+    while(1) {
+        int *new_sock;
+        new_sock = malloc(1);
+        *new_sock = accept(serverSocket, (struct sockaddr*)&clientAddr, &addrLen);
+
+        if (*new_sock < 0) {
             perror("Error accepting connection");
             exit(EXIT_FAILURE);
         }
 
         printf("Connection accepted from %s:%d\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
 
-        // Nhận dữ liệu từ client
-        char buffer[MAX_BUFFER_SIZE];
-        ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
-
-        if (bytesRead == -1) {
-            perror("Error receiving data");
-            exit(EXIT_FAILURE);
+        pthread_t client_thread;
+        if (pthread_create(&client_thread, NULL, handle_client, (void*) new_sock) < 0) {
+            perror("Error creating thread");
+            return 1;
         }
 
-        buffer[bytesRead] = '\0';
-        if (strcmp(buffer, "exit") == 0) {
-            printf("Client disconnected\n");
-            // Đóng kết nối
-            close(clientSocket);
-            break;
-        }
-        // Thực hiện tính toán
-        int result = calculateExpression(buffer);
-       
-        sprintf(buffer, "%d", result);
-        send(clientSocket, buffer, strlen(buffer), 0);
-
-        
+        // Now join the thread, so that we don't terminate before the thread
+        // pthread_join(client_thread, NULL);
+        printf("Handler assigned\n");
     }
     // Đóng kết nối
     close(serverSocket);
