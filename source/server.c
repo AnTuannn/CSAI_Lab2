@@ -174,7 +174,7 @@ void *handle_client(void *arg)
 
         if (bytesRead <= 0) 
         {
-            perror("Error receiving data or client disconnected: Client %d disconnected\n", clientSocket);
+            printf("Error receiving data or client disconnected: Client %d disconnected\n", clientSocket);
             close(clientSocket);
             pthread_exit(NULL);
         }
