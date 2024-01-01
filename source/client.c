@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <ctype.h>
 
-#define PORT 8080
+#define PORT 8000
 #define MAX_BUFFER_SIZE 256
 
 int main() {
@@ -33,29 +33,30 @@ int main() {
         perror("Error connecting to server");
         exit(EXIT_FAILURE);
     }
+    while(1)
+    {
+        // Nhập dữ liệu từ người dùng
+        printf("Enter an arithmetic expression: ");
+        char expression[MAX_BUFFER_SIZE];
+        fgets(expression, sizeof(expression), stdin);
 
-    // Nhập dữ liệu từ người dùng
-    printf("Enter an arithmetic expression: ");
-    char expression[MAX_BUFFER_SIZE];
-    fgets(expression, sizeof(expression), stdin);
+        // Gửi dữ liệu đến server
+        send(clientSocket, expression, strlen(expression), 0);
 
-    // Gửi dữ liệu đến server
-    send(clientSocket, expression, strlen(expression), 0);
+        // Nhận kết quả từ server
+        char buffer[MAX_BUFFER_SIZE];
+        ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
 
-    // Nhận kết quả từ server
-    char buffer[MAX_BUFFER_SIZE];
-    ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
+        if (bytesRead == -1) {
+            perror("Error receiving data");
+            exit(EXIT_FAILURE);
+        }
 
-    if (bytesRead == -1) {
-        perror("Error receiving data");
-        exit(EXIT_FAILURE);
+        buffer[bytesRead] = '\0';
+
+        // In kết quả
+        printf("Result: %s\n", buffer);
     }
-
-    buffer[bytesRead] = '\0';
-
-    // In kết quả
-    printf("Result: %s\n", buffer);
-
     // Đóng kết nối
     close(clientSocket);
 

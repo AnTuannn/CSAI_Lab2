@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#define PORT 8080
+#define PORT 8000
 #define MAX_BUFFER_SIZE 256
 #define MAX_SIZE 100
 
@@ -178,7 +178,7 @@ int main() {
         }
 
         // Now join the thread, so that we don't terminate before the thread
-        // pthread_join(client_thread, NULL);
+        pthread_join(client_thread, NULL);
         printf("Handler assigned\n");
     }
     // Đóng kết nối
