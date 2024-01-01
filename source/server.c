@@ -42,7 +42,6 @@ int precedence(char op) {
 }
 
 int calculate(int num1, int num2, char op) {
-     printf("%d %c %d = %d\n", num1, op, num2);
     switch (op) {
         case '+': return num1 + num2;
         case '-': return num1 - num2;
@@ -154,7 +153,7 @@ int main() {
     // Thực hiện tính toán
     int result = calculateExpression(buffer);
    
-    snprintf(buffer, "%d", result);
+    sprintf(buffer, "%d", result);
     send(clientSocket, buffer, strlen(buffer), 0);
 
     // Đóng kết nối

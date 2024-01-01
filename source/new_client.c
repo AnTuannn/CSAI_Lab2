@@ -34,7 +34,16 @@ int main() {
     }
 
     // Send an expression to the server
-    char* expression = "1 + 2";
+    char expression[MAX_SIZE];
+    printf("Enter the expression (type 'exit' to stop): ");
+    fgets(expression, MAX_SIZE, stdin);
+
+    // Check if the user wants to exit
+    if (strcmp(expression, "exit\n") == 0) {
+        printf("Exiting...\n");
+        return 0;
+    }
+
     send(sock, expression, strlen(expression), 0);
     printf("Expression sent to server\n");
 
