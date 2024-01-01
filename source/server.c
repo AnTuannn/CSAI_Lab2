@@ -9,30 +9,7 @@
 #define MAX_BUFFER_SIZE 256
 #define MAX_SIZE 100
 
-int stack[MAX_SIZE];
 int top = -1;
-pthread_mutex_t lock; // Khởi tạo mutex
-
-// Hàm để push value vào stack
-void push(int x) 
-{
-    if (top == MAX_SIZE - 1) 
-    {
-        printf("Stack overflow\n");
-        return;
-    }
-    stack[++top] = x;
-}
-// Hàm để pop value ra khỏi stack
-int pop() 
-{
-    if (top == -1) 
-    {
-        printf("Stack underflow\n");
-        return 0;
-    }
-    return stack[top--];
-}
 
 // Hàm để xác định độ ưu tiên của toán tử với giá trị càng lớn độ ưu tiên càng cao
 int precedence(char op) 
@@ -188,11 +165,7 @@ void *handle_client(void *arg)
         }
         else
         {
-            pthread_mutex_lock(&lock); // Khóa mutex
-
             result = calculateExpression(buffer);
-
-            pthread_mutex_unlock(&lock); // Mở khóa mutex
             sprintf(buffer, "%d", result);
         }
         
@@ -205,7 +178,6 @@ int main()
     int serverSocket, clientSocket;
     struct sockaddr_in serverAddr, clientAddr;
     socklen_t addrLen = sizeof(clientAddr);
-    pthread_mutex_init(&lock, NULL); // Khởi tạo mutex
     // Tạo socket
     if ((serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1) 
     {
@@ -261,8 +233,5 @@ int main()
     }
     // Đóng kết nối
     close(serverSocket);
-
-    pthread_mutex_destroy(&lock); // Hủy mutex
-
     return 0;
 }
