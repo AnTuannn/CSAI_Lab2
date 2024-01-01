@@ -68,7 +68,7 @@ int main()
         buffer[bytesRead] = '\0';
 
         // In kết quả 
-        printf("Result: %s\n", buffer);
+        printf("Server response result: %s\n", buffer);
     }
 
     // Đóng kết nối
