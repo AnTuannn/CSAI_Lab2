@@ -51,6 +51,19 @@ int calculate(int num1, int num2, char op) {
     }
    
 }
+int checkExpression(const char* expression)
+{
+    for (int i = 0; i < strlen(expression); i++)
+    {
+        if (expression[i] != '(' && expression[i] != ')' && 
+            expression[i] != '+' && expression[i] != '-' && 
+            expression[i] != '*' && expression[i] != '/' && 
+            expression[i] != ' ' && !isdigit(expression[i])) {
+                return i+1;
+            }
+    }
+    return 0;
+}
 
 int calculateExpression(const char* expression) {
     int i, num;
@@ -70,9 +83,11 @@ int calculateExpression(const char* expression) {
             }
             i--;
             numbers[++numTop] = num;
-        } else if (expression[i] == '(') {
+        } 
+        else if (expression[i] == '(') {
             operators[++opTop] = expression[i];
-        } else if (expression[i] == ')') {
+        } 
+        else if (expression[i] == ')') {
             while (opTop != -1 && operators[opTop] != '(') {
                 num = calculate(numbers[numTop - 1], numbers[numTop], operators[opTop]);
                 numbers[numTop - 1] = num;
@@ -80,15 +95,19 @@ int calculateExpression(const char* expression) {
                 opTop--;
             }
             opTop--; // remove '('
-        } else {
+        } 
+        else if (!isdigit(expression[i]) && expression[i] != '+' && expression[i] != '-' && expression[i] != '*' && expression[i] != '/' && expression[i] != '(' && expression[i] != ')') {
+            return false;
+        } 
+        else {
             while (opTop != -1 && precedence(expression[i]) <= precedence(operators[opTop])) {
                 num = calculate(numbers[numTop - 1], numbers[numTop], operators[opTop]);
                 numbers[numTop - 1] = num;
                 numTop--;
                 opTop--;
-            }
+                }
             operators[++opTop] = expression[i];
-        }
+            }   
     }
 
     while (opTop != -1) {
@@ -123,9 +142,19 @@ void *handle_client(void *arg) {
             close(clientSocket);
             pthread_exit(NULL);
         }
-
-        int result = calculateExpression(buffer);
-        sprintf(buffer, "%d", result);
+        int check = checkExpression(buffer);
+        int result = 0;
+        if (check != 0)
+        {
+            result = check;
+            sprintf(buffer, "Error: Expression has an error at the %d character, not a number or a mathematical operator, please check again.", result);
+        }
+        else
+        {
+            result = calculateExpression(buffer);
+            sprintf(buffer, "%d", result);
+        }
+        
         send(clientSocket, buffer, strlen(buffer), 0);
     }
 }
