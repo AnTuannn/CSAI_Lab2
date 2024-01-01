@@ -33,12 +33,19 @@ int main() {
         perror("Error connecting to server");
         exit(EXIT_FAILURE);
     }
-    while(1)
-    {
+    while(1) {
         // Nhập dữ liệu từ người dùng
-        printf("Enter an arithmetic expression: ");
+        printf("Enter an arithmetic expression (or 'exit' to quit): ");
         char expression[MAX_BUFFER_SIZE];
         fgets(expression, sizeof(expression), stdin);
+
+        // Remove newline character at the end of the expression
+        expression[strcspn(expression, "\n")] = 0;
+
+        // Check if the user wants to exit
+        if (strcmp(expression, "exit") == 0) {
+            break; // Break the loop
+        }
 
         // Gửi dữ liệu đến server
         send(clientSocket, expression, strlen(expression), 0);
@@ -49,14 +56,16 @@ int main() {
 
         if (bytesRead == -1) {
             perror("Error receiving data");
-            exit(EXIT_FAILURE);
+            continue; // Skip the rest of this loop iteration
         }
 
+        // Null-terminate the received data to safely use it as a string
         buffer[bytesRead] = '\0';
 
-        // In kết quả
+        // Print the result
         printf("Result: %s\n", buffer);
     }
+    
     // Đóng kết nối
     close(clientSocket);
 
