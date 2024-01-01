@@ -8,12 +8,14 @@
 #define PORT 8000
 #define MAX_BUFFER_SIZE 256
 
-int main() {
+int main() 
+{
     int clientSocket;
     struct sockaddr_in serverAddr;
 
     // Tạo socket
-    if ((clientSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+    if ((clientSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1) 
+    {
         perror("Error creating socket");
         exit(EXIT_FAILURE);
     }
@@ -23,29 +25,31 @@ int main() {
     serverAddr.sin_port = htons(PORT);
 
     // Chuyển đổi địa chỉ IP sang địa chỉ máy chủ
-    if (inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr) <= 0) {
+    if (inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr) <= 0) 
+    {
         perror("Invalid address/ Address not supported");
         exit(EXIT_FAILURE);
     }
 
     // Kết nối đến server
-    if (connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
+    if (connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) 
+    {
         perror("Error connecting to server");
         exit(EXIT_FAILURE);
     }
-    while(1) {
+    while(1) 
+    {
         // Nhập dữ liệu từ người dùng
         printf("Enter an arithmetic expression (or 'exit' to quit): ");
         char expression[MAX_BUFFER_SIZE];
         fgets(expression, sizeof(expression), stdin);
 
-        // Remove newline character at the end of the expression
+        // Xóa ký tự xuống hàng ở cuối chuỗi
         expression[strcspn(expression, "\n")] = 0;
 
-        // Check if the user wants to exit
-        if (strcmp(expression, "exit") == 0) {
-            break; // Break the loop
-        }
+        // Kiểm tra nếu người dùng muốn thoát
+        if (strcmp(expression, "exit") == 0) 
+            break; // Dừng vòng lập
 
         // Gửi dữ liệu đến server
         send(clientSocket, expression, strlen(expression), 0);
@@ -54,18 +58,19 @@ int main() {
         char buffer[MAX_BUFFER_SIZE];
         ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
 
+        // Thông báo lỗi không nhận được dữ liệu và tiếp tục vòng lặp
         if (bytesRead == -1) {
             perror("Error receiving data");
-            continue; // Skip the rest of this loop iteration
+            continue; 
         }
 
-        // Null-terminate the received data to safely use it as a string
+        // Thêm vào ký tự kết thúc chuỗi
         buffer[bytesRead] = '\0';
 
-        // Print the result
+        // In kết quả 
         printf("Result: %s\n", buffer);
     }
-    
+
     // Đóng kết nối
     close(clientSocket);
 
