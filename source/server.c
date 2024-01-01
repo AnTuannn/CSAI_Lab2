@@ -3,7 +3,6 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include <test.c>
 
 #define PORT 8080
 #define MAX_BUFFER_SIZE 256
@@ -130,34 +129,41 @@ int main() {
     }
 
     printf("Server listening on port %d...\n", PORT);
+    while(1)
+    {
+        // Chấp nhận kết nối từ client
+        if ((clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &addrLen)) == -1) {
+            perror("Error accepting connection");
+            exit(EXIT_FAILURE);
+        }
 
-    // Chấp nhận kết nối từ client
-    if ((clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &addrLen)) == -1) {
-        perror("Error accepting connection");
-        exit(EXIT_FAILURE);
+        printf("Connection accepted from %s:%d\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
+
+        // Nhận dữ liệu từ client
+        char buffer[MAX_BUFFER_SIZE];
+        ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
+
+        if (bytesRead == -1) {
+            perror("Error receiving data");
+            exit(EXIT_FAILURE);
+        }
+
+        buffer[bytesRead] = '\0';
+        if (strcmp(buffer, "exit") == 0) {
+            printf("Client disconnected\n");
+            // Đóng kết nối
+            close(clientSocket);
+            break;
+        }
+        // Thực hiện tính toán
+        int result = calculateExpression(buffer);
+       
+        sprintf(buffer, "%d", result);
+        send(clientSocket, buffer, strlen(buffer), 0);
+
+        
     }
-
-    printf("Connection accepted from %s:%d\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
-
-    // Nhận dữ liệu từ client
-    char buffer[MAX_BUFFER_SIZE];
-    ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
-
-    if (bytesRead == -1) {
-        perror("Error receiving data");
-        exit(EXIT_FAILURE);
-    }
-
-    buffer[bytesRead] = '\0';
-
-    // Thực hiện tính toán
-    int result = calculateExpression(buffer);
-   
-    sprintf(buffer, "%d", result);
-    send(clientSocket, buffer, strlen(buffer), 0);
-
     // Đóng kết nối
-    close(clientSocket);
     close(serverSocket);
 
     return 0;
