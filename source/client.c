@@ -49,7 +49,11 @@ int main()
 
         // Kiểm tra nếu người dùng muốn thoát
         if (strcmp(expression, "exit") == 0) 
-            break; // Dừng vòng lập
+        {
+            printf("Disconnected from server\n");
+            send(clientSocket, expression, strlen(expression), 0);
+            break;
+        }
 
         // Gửi dữ liệu đến server
         send(clientSocket, expression, strlen(expression), 0);
